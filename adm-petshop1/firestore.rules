@@ -1,0 +1,319 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- helpers ----
+    function isYmd(s) { 
+      return s is string && s.matches('^\\d{4}-\\d{2}-\\d{2}$'); 
+    }
+
+    function isHHmm(s){ 
+      return s is string && s.matches('^\\d{2}:\\d{2}$'); 
+    }
+
+    function panelOpen() {
+      return request.time < timestamp.date(2027, 1, 1);
+    }
+
+    function isReservasCollection(name) {
+      return name is string && name.matches('^reservas_[a-z0-9_]+$');
+    }
+
+    // ========= CONFIG =========
+    match /config/{doc} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ========= SERVIÇOS =========
+    match /servicos/{doc} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ========= PROFISSIONAIS =========
+    match /profissionais/{doc} {
+      allow read, create, update, delete: if true;
+
+      // EXCEÇÕES POR PROFISSIONAL
+      match /excecoes/{exId} {
+        allow read, create, update, delete: if true;
+      }
+    }
+
+    // ========= EXCEÇÕES GERAIS DO SALÃO =========
+    match /excecoes/{exId} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ✅ Caminho que seu firebase.js usa:
+    // /config/excecoes/dias/{ymd}
+    match /config/excecoes/dias/{exId} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ✅ Mantido também caso algum trecho antigo ainda use:
+    match /config/{cfgId}/excecoes/{exId} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ========= AGENDA =========
+    match /{colecaoReservas}/{docId} {
+      // leitura pública apenas para coleções reservas_*
+      allow read: if isReservasCollection(colecaoReservas);
+
+      // create público/site/adm com validação mínima
+      allow create: if isReservasCollection(colecaoReservas)
+        && isYmd(request.resource.data.data)
+        && isHHmm(request.resource.data.hora)
+        && !exists(/databases/$(database)/documents/$(colecaoReservas)/$(docId));
+
+      // update/delete liberado sem login
+      allow update, delete: if isReservasCollection(colecaoReservas);
+    }
+
+    // ========= RA CLUB =========
+    match /raclub_clients/{doc} {
+      allow read, write: if true;
+    }
+
+    match /raclub_payments/{doc} {
+      allow read, write: if true;
+    }
+
+    // ========= PRODUTOS =========
+    match /produtos/{doc} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ========= PDV =========
+    match /pdv_sales/{doc} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ========= DESPESAS =========
+    match /rabarbearia_expenses/{doc} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ========= DESPESAS (coleção usada no firebase.js) =========
+    match /despesas/{doc} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ========= VENDAS (coleção usada no firebase.js) =========
+    match /vendas/{doc} {
+      allow read, create, update, delete: if true;
+    }
+
+    // ========= HOTELZINHO =========
+    match /hotelzinho/{docId} {
+      allow read: if true;
+
+      allow create: if
+        request.resource.data.tutorNome is string
+        && request.resource.data.tutorNome.size() > 0
+        && request.resource.data.animalNome is string
+        && request.resource.data.animalNome.size() > 0
+
+        // endereço opcional
+        && (
+          !('endereco' in request.resource.data)
+          || request.resource.data.endereco is string
+        )
+
+        // telefone obrigatório
+        && request.resource.data.telefone is string
+        && request.resource.data.telefone.size() > 0
+
+        // telefone formatado opcional
+        && (
+          !('telefoneFormatado' in request.resource.data)
+          || request.resource.data.telefoneFormatado is string
+        )
+
+        // datas obrigatórias
+        && isYmd(request.resource.data.dataEntrada)
+        && isYmd(request.resource.data.dataSaida)
+
+        // tipos de chegada/saída
+        && (
+          !('chegadaTipo' in request.resource.data)
+          || request.resource.data.chegadaTipo is string
+        )
+        && (
+          !('saidaTipo' in request.resource.data)
+          || request.resource.data.saidaTipo is string
+        )
+
+        // status
+        && (
+          !('status' in request.resource.data)
+          || request.resource.data.status is string
+        )
+
+        // observação opcional
+        && (
+          !('obs' in request.resource.data)
+          || request.resource.data.obs is string
+        )
+
+        // origem opcional
+        && (
+          !('origemCadastro' in request.resource.data)
+          || request.resource.data.origemCadastro is string
+        )
+
+        // timestamps opcionais
+        && (
+          !('createdAt' in request.resource.data)
+          || request.resource.data.createdAt is timestamp
+        )
+        && (
+          !('updatedAt' in request.resource.data)
+          || request.resource.data.updatedAt is timestamp
+          || request.resource.data.updatedAt == null
+        );
+
+      allow update, delete: if true;
+    }
+
+    // ========= BUSCA / ENTREGA =========
+    match /busca_entrega/{docId} {
+      allow read: if true;
+
+      allow create: if
+        request.resource.data.nome is string
+        && request.resource.data.nome.size() > 0
+        && request.resource.data.endereco is string
+        && request.resource.data.endereco.size() > 0
+        && request.resource.data.contato is string
+        && request.resource.data.contato.size() > 0
+
+        // contato formatado opcional
+        && (
+          !('contatoFormatado' in request.resource.data)
+          || request.resource.data.contatoFormatado is string
+        )
+
+        // data/hora de busca
+        && isYmd(request.resource.data.dataBusca)
+        && isHHmm(request.resource.data.horaBusca)
+
+        // data/hora de entrega
+        && isYmd(request.resource.data.dataEntrega)
+        && isHHmm(request.resource.data.horaEntrega)
+
+        // status opcional
+        && (
+          !('status' in request.resource.data)
+          || request.resource.data.status is string
+        )
+
+        // observação opcional
+        && (
+          !('obs' in request.resource.data)
+          || request.resource.data.obs is string
+        )
+
+        // motorista / rota opcionais
+        && (
+          !('motoristaId' in request.resource.data)
+          || request.resource.data.motoristaId is string
+          || request.resource.data.motoristaId == null
+        )
+        && (
+          !('ordemRota' in request.resource.data)
+          || request.resource.data.ordemRota is number
+          || request.resource.data.ordemRota == null
+        )
+
+        // origem opcional
+        && (
+          !('origemCadastro' in request.resource.data)
+          || request.resource.data.origemCadastro is string
+        )
+
+        // timestamps opcionais
+        && (
+          !('createdAt' in request.resource.data)
+          || request.resource.data.createdAt is timestamp
+        )
+        && (
+          !('updatedAt' in request.resource.data)
+          || request.resource.data.updatedAt is timestamp
+          || request.resource.data.updatedAt == null
+        );
+
+      allow update, delete: if true;
+    }
+
+    // ========= CONTAS A PAGAR =========
+    match /contas_apagar/{docId} {
+      allow read: if true;
+
+      allow create: if
+        request.resource.data.nome is string
+        && request.resource.data.nome.size() > 0
+        
+        // descrição opcional
+        && (!('descricao' in request.resource.data) || request.resource.data.descricao is string)
+
+        // categoria opcional
+        && (!('categoria' in request.resource.data) || request.resource.data.categoria is string)
+
+        // aceita valor OU valorTotal
+        && (
+          ('valor' in request.resource.data && request.resource.data.valor is number)
+          || ('valorTotal' in request.resource.data && request.resource.data.valorTotal is number)
+        )
+
+        // parcelas
+        && request.resource.data.parcelas is number
+        && request.resource.data.parcelas >= 1
+
+        // vencimento aceita string yyyy-mm-dd OU timestamp
+        && (
+          request.resource.data.vencimento is timestamp
+          || isYmd(request.resource.data.vencimento)
+        )
+
+        // forma pagamento opcional
+        && (
+          !('formaPagamento' in request.resource.data)
+          || request.resource.data.formaPagamento is string
+          || request.resource.data.formaPagamento == null
+        )
+
+        // status opcional
+        && (
+          !('status' in request.resource.data)
+          || request.resource.data.status is string
+        )
+
+        // parcelasData opcional
+        && (
+          !('parcelasData' in request.resource.data)
+          || request.resource.data.parcelasData is list
+        )
+
+        // createdAt opcional
+        && (
+          !('createdAt' in request.resource.data)
+          || request.resource.data.createdAt is timestamp
+        )
+
+        // updatedAt opcional
+        && (
+          !('updatedAt' in request.resource.data)
+          || request.resource.data.updatedAt is timestamp
+          || request.resource.data.updatedAt == null
+        );
+
+      allow update, delete: if true;
+    }
+
+    // ---- bloqueio padrão ----
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
