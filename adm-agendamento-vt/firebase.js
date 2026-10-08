@@ -361,7 +361,7 @@ export const PAYMENT_METHODS = [
   "Dinheiro",
   "Cartão de Crédito",
   "Cartão de Débito",
-  "Nilton Club",
+  "NF Club",
   "Outro",
 ];
 

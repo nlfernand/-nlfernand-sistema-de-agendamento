@@ -945,7 +945,7 @@ confirmarBtn?.addEventListener('click', async () => {
       hora: hhmm,
 
       // mantém seus campos
-      profissional: ctx.profissionalId || 'rodrigotorre2',
+      profissional: ctx.profissionalId || 'nf',
       profissionalNome: ctx.profissionalNome || null,
 
       clienteNome: agendamentoContexto.nomeCliente,
@@ -987,7 +987,7 @@ confirmarBtn?.addEventListener('click', async () => {
         <div class="line"><span class="label">Data:</span><span>${dataBR}</span></div>
         <div class="line"><span class="label">Hora:</span><span>${hhmm}</span></div>
         <div class="line"><span class="label">Serviço:</span><span>${servicoTxt}</span></div>
-        <div class="line"><span class="label">RA Club:</span><span>${raclubTxt}</span></div>
+        <div class="line"><span class="label">NF Club:</span><span>${raclubTxt}</span></div>
       `;
     }
     fecharModal('modal');
@@ -1264,7 +1264,7 @@ reaConfirmarBtn?.addEventListener('click', async () => {
         const payloadNew = buildPayloadFromOld(base, {
           data: novaData,
           hora: novaHora,
-          profissionalId: ctx.profissionalId || 'rodrigotorre2',
+          profissionalId: ctx.profissionalId || 'nf',
           profissionalNome: ctx.profissionalNome || null,
           reagendadoDe: refAntigo.id
         });
@@ -1274,7 +1274,7 @@ reaConfirmarBtn?.addEventListener('click', async () => {
         const payloadSame = buildPayloadFromOld(base, {
           data: novaData,
           hora: novaHora,
-          profissionalId: ctx.profissionalId || 'rodrigotorre2',
+          profissionalId: ctx.profissionalId || 'nf',
           profissionalNome: ctx.profissionalNome || null,
           reagendadoDe: refAntigo.id
         });
@@ -1295,7 +1295,7 @@ reaConfirmarBtn?.addEventListener('click', async () => {
         const payload = buildPayloadFromOld(base, {
           data: novaData,
           hora: novaHora,
-          profissionalId: ctx.profissionalId || 'rodrigotorre2',
+          profissionalId: ctx.profissionalId || 'nf',
           profissionalNome: ctx.profissionalNome || null,
           reagendadoDe: refAntigo.id
         });
@@ -1308,7 +1308,7 @@ reaConfirmarBtn?.addEventListener('click', async () => {
         const payload = buildPayloadFromOld(base, {
           data: novaData,
           hora: novaHora,
-          profissionalId: ctx.profissionalId || 'rodrigotorre2',
+          profissionalId: ctx.profissionalId || 'nf',
           profissionalNome: ctx.profissionalNome || null,
           reagendadoDe: refAntigo.id
         });
