@@ -1,3 +1,4 @@
 {
-    "geminicodeassist.outlines.automaticOutlineGeneration": true
+    "geminicodeassist.outlines.automaticOutlineGeneration": true,
+    "liveServer.settings.port": 5501
 }

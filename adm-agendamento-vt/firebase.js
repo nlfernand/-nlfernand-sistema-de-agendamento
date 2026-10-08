@@ -354,7 +354,7 @@ function setupAuthGate() {
 setupAuthGate();
 
 /* ========= Estado compartilhado ========= */
-export const BOOKING_URL = "https://site-agendamento-vt.vercel.app/"; // link público na internet para enviar ao cliente
+export const BOOKING_URL = "https://agendamento-vt.vercel.app/"; // link público na internet para enviar ao cliente
 
 export const PAYMENT_METHODS = [
   "PIX",

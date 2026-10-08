@@ -992,6 +992,27 @@ confirmarBtn?.addEventListener('click', async () => {
     }
     fecharModal('modal');
     abrirModal('modalConfirmacao');
+
+    // --- LIMPAR CACHE APÓS AGENDAMENTO BEM SUCEDIDO ---
+    agendamentoContexto = {
+      nomeCliente: '',
+      sobrenomeCliente: '',
+      telefoneCliente: '',
+      produtos: [],
+      totalProdutos: 0,
+      raclub: { status: 'nao' },
+      servico: null
+    };
+    sessionStorage.removeItem('agendamentoCtx');
+    
+    // Limpar os campos do formulário na tela
+    if (document.getElementById('nomeCliente')) document.getElementById('nomeCliente').value = '';
+    if (document.getElementById('sobrenomeCliente')) document.getElementById('sobrenomeCliente').value = '';
+    if (document.getElementById('telefoneCliente')) document.getElementById('telefoneCliente').value = '';
+    if (document.getElementById('servicoDisplay')) document.getElementById('servicoDisplay').value = '';
+    if (document.getElementById('data')) document.getElementById('data').value = '';
+    if (document.getElementById('hora')) document.getElementById('hora').value = '';
+    
   } catch (err) {
     console.error("[RESERVA]", err);
     alert("Não foi possível concluir a reserva. Tente novamente.");
